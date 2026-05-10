@@ -76,7 +76,8 @@ class TranslationController extends Controller
     public function store(StoreTranslationRequest $request): JsonResponse
     {
         try {
-            $translation = $this->translationService->upsert($request->validated());
+            $requestData = $request->validated();
+            $translation = $this->translationService->upsert($requestData);
 
             return $this->successResponse(
                 new TranslationResource($translation),
