@@ -108,7 +108,7 @@ docker-compose down
 
 ## 📖 API Documentation
 
-Once running, visit `http://localhost/docs` for interactive API documentation including:
+Once running, visit `http://localhost:8000/docs` for interactive API documentation including:
 
 - Authentication endpoints (`/api/v1/login`, `/api/v1/logout`)
 - Translation management (`/api/v1/translations/*`)
