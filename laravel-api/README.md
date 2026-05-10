@@ -92,7 +92,7 @@ A Laravel-based REST API for managing translations with search, export, and auth
 Once the application is running, access the interactive API documentation at:
 
 ```
-http://localhost/docs
+http://localhost:8000/docs
 ```
 
 The documentation is auto-generated from PHP 8 attributes using L5 Swagger.
