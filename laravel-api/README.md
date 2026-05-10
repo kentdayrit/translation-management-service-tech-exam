@@ -1,63 +1,221 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Translation Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based REST API for managing translations with search, export, and authentication features.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 🔐 **Authentication**: Laravel Sanctum for secure API access
+- 🔍 **Search & Filter**: Advanced translation search by key, content, locale, and tags
+- 📤 **Export**: Bulk export translations by locale
+- 📚 **API Documentation**: Interactive Swagger UI documentation
+- 🚀 **Caching**: Redis-backed caching for performance
+- ✅ **Validation**: Comprehensive request validation
+- 🏗️ **Versioned API**: v1 API endpoints
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel 12** - PHP framework
+- **Laravel Sanctum** - API authentication
+- **Redis** - Caching and sessions
+- **MySQL** - Database
+- **L5 Swagger** - API documentation
+- **PHP 8.2+** - Language version
 
-## Learning Laravel
+## Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.2 or higher
+- Composer
+- MySQL 8.0+
+- Redis (optional, for caching)
+- Docker & Docker Compose (for containerized setup)
 
-## CDN Support
+## Installation
 
-If you deploy compiled frontend assets to a CDN, set `ASSET_URL` in your environment to the CDN host. Laravel will then generate `asset()` URLs from that origin for static files and Vite-built assets.
+### Option 1: Docker Setup (Recommended)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd translation-management-service/laravel-api
+   ```
 
-## Laravel Sponsors
+2. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database and Redis settings
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Build and Run with Docker**
+   ```bash
+   # From the project root
+   docker-compose up -d
+   ```
 
-### Premium Partners
+4. **Run Migrations**
+   ```bash
+   docker-compose exec api php artisan migrate
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Seed Database (Optional)**
+   ```bash
+   docker-compose exec api php artisan db:seed
+   ```
+
+### Option 2: Local Setup
+
+1. **Install Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
+
+2. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+3. **Database Setup**
+   ```bash
+   # Create MySQL database
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+4. **Start the Server**
+   ```bash
+   php artisan serve
+   ```
+
+## API Documentation
+
+Once the application is running, access the interactive API documentation at:
+
+```
+http://localhost/docs
+```
+
+The documentation is auto-generated from PHP 8 attributes using L5 Swagger.
+
+## API Endpoints
+
+### Authentication
+- `POST /api/v1/login` - User login
+- `POST /api/v1/logout` - User logout (requires auth)
+
+### Translations
+- `GET /api/v1/translations/search` - Search translations
+- `POST /api/v1/translations` - Create/update translation (requires auth)
+- `GET /api/v1/translations/export/{locale}` - Export translations by locale
+
+## Design Choices
+
+### Architecture
+
+**Laravel Framework**: Chosen for its robust ecosystem, security features, and developer experience. Laravel 12 provides modern PHP features and long-term support.
+
+**API-First Design**: RESTful API with consistent JSON responses using Laravel Resources and a custom `ApiResponser` trait for standardized success/error responses.
+
+**Versioning**: API endpoints are prefixed with `v1` to allow for future versioning without breaking changes.
+
+### Authentication & Security
+
+**Laravel Sanctum**: Provides simple, secure API token authentication. Tokens are issued on login and can be revoked on logout.
+
+**Request Validation**: Dedicated Form Request classes (`SearchTranslationRequest`, `StoreTranslationRequest`) handle validation with custom error messages.
+
+### Performance & Caching
+
+**Redis Caching**: Implemented at multiple levels:
+- Translation search results cached for 5 minutes
+- Export data cached for 10 minutes
+- Cache invalidation on translation updates
+
+**Pagination**: Search results are paginated with configurable page sizes (max 100 items).
+
+### Data Management
+
+**Eloquent ORM**: Clean, expressive database interactions with relationships and scopes.
+
+**Migration-Based Schema**: Database schema managed through Laravel migrations for version control and environment consistency.
+
+**Factory & Seeders**: Test data generation using Laravel factories and seeders.
+
+### Documentation
+
+**L5 Swagger**: Auto-generates OpenAPI 3.0 specification from PHP 8 attributes. Provides interactive documentation and client SDK generation.
+
+**Attributes over Annotations**: Uses modern PHP 8 attributes (`#[OA\Get(...)]`) instead of docblock comments for cleaner, more maintainable code.
+
+### Error Handling
+
+**Custom Exceptions**: `TranslationException` and `TranslationExportException` for domain-specific errors.
+
+**Structured Responses**: Consistent JSON response format with status, message, and data fields.
+
+**HTTP Status Codes**: Appropriate status codes (200, 201, 400, 401, 404, 500) for different scenarios.
+
+### Testing
+
+**PHPUnit**: Unit and feature tests included for critical functionality.
+
+**Test Database**: Separate SQLite database for testing to avoid affecting development data.
+
+## Development
+
+### Running Tests
+```bash
+php artisan test
+```
+
+### Code Quality
+```bash
+# Run Pint for code formatting
+./vendor/bin/pint
+
+# Run PHPStan for static analysis (if configured)
+# php artisan code:analyse
+```
+
+### Generating Documentation
+```bash
+php artisan l5-swagger:generate
+```
+
+## Environment Variables
+
+Key environment variables to configure:
+
+```env
+APP_NAME=Translation Management API
+APP_ENV=local
+APP_KEY=base64:your-app-key
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
