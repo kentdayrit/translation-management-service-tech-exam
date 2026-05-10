@@ -1,0 +1,250 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Translation Management API",
+        "description": "API for searching, exporting and storing translations with Sanctum authentication.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/api",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/v1/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate a user and receive an access token.",
+                "operationId": "60ea6c037acd6167d9cd13e71538e375",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authenticated successfully."
+                    },
+                    "401": {
+                        "description": "Invalid credentials provided."
+                    }
+                }
+            }
+        },
+        "/v1/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log out the authenticated user by revoking the current token.",
+                "operationId": "da33e6aff3492b4bd5056de51dafaa52",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully."
+                    },
+                    "401": {
+                        "description": "Authentication required."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/translations/search": {
+            "get": {
+                "tags": [
+                    "Translations"
+                ],
+                "summary": "Search translations by key, content, locale, or tag.",
+                "operationId": "9003696f64068da0c13c9c9f32882c05",
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "content",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Translations retrieved successfully."
+                    },
+                    "400": {
+                        "description": "Invalid query parameters."
+                    }
+                }
+            }
+        },
+        "/v1/translations": {
+            "post": {
+                "tags": [
+                    "Translations"
+                ],
+                "summary": "Create or update a translation entry.",
+                "operationId": "a16b613dc06994e829689743dab74553",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "key": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "locale": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Translation saved successfully."
+                    },
+                    "400": {
+                        "description": "Validation failed."
+                    },
+                    "401": {
+                        "description": "Authentication required."
+                    },
+                    "500": {
+                        "description": "Server error while saving translation."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/translations/export/{locale}": {
+            "get": {
+                "tags": [
+                    "Translations"
+                ],
+                "summary": "Export all translations for a locale.",
+                "operationId": "6267b0d3e994622bfef6a0fa4c8d4175",
+                "parameters": [
+                    {
+                        "name": "locale",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Translations exported successfully."
+                    },
+                    "404": {
+                        "description": "No translations found for the locale."
+                    },
+                    "500": {
+                        "description": "Server error."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Bearer",
+                "scheme": "bearer"
+            },
+            "0": []
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Translations",
+            "description": "Translations"
+        }
+    ]
+}

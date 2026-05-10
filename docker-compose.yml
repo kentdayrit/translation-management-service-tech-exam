@@ -1,0 +1,68 @@
+services:
+  # PHP-FPM Application Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: translation-api-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - translation-network
+
+  # Nginx Web Server
+  web:
+    image: nginx:alpine
+    container_name: translation-api-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - translation-network
+
+  # Database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: translation-api-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: translation_service
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - translation-network
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: translation-api-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password
+    depends_on:
+      - db
+    networks:
+      - translation-network
+
+  redis:
+    image: redis:alpine
+    container_name: translation-api-redis
+    networks:
+      - translation-network
+
+networks:
+  translation-network:
+    driver: bridge
+
+volumes:
+  db_data:
