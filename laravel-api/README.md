@@ -35,7 +35,7 @@ A Laravel-based REST API for managing translations with search, export, and auth
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/kentdayrit/translation-management-service-tech-exam.git
    cd translation-management-service/laravel-api
    ```
 
