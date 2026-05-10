@@ -10,7 +10,7 @@ cd translation-management-service
 docker-compose up -d
 ```
 
-That's it! The application will be running at `http://localhost` with API documentation at `http://localhost/docs`.
+That's it! The application will be running at `http://localhost:8000` with API documentation at `http://localhost:8000/docs`.
 
 ## 📋 What's Included
 
