@@ -17,42 +17,66 @@ class TranslationService
 
     public function search(array $filters): LengthAwarePaginator
     {
-        $cacheKey = 'translations_search_' . md5(serialize($filters));
-        $ttl = 300; // 5 minutes
+        $query = Translation::filter($filters)
+            ->orderBy('key')
+            ->orderBy('locale');
 
-        return Cache::remember($cacheKey, $ttl, function () use ($filters) {
-            $query = Translation::filter($filters);
-            $perPage = $filters['per_page'] ?? 50;
+        $perPage = $filters['per_page'] ?? 50;
 
-            return $query->paginate($perPage);
-        });
+        return $query->paginate($perPage);
     }
 
     public function getExportData(string $locale): array
     {
         $cacheKey = "translations_export_{$locale}";
         $ttl = 600; // 10 minutes
+        $cacheTags = ["translations_locale_{$locale}"];
+
+        if ($this->cacheService->supportsTags()) {
+            return Cache::tags($cacheTags)->remember($cacheKey, $ttl, function () use ($locale) {
+                return $this->loadExportData($locale);
+            });
+        }
 
         return Cache::remember($cacheKey, $ttl, function () use ($locale) {
-            $translations = Translation::where('locale', $locale)
-                ->pluck('content', 'key')
-                ->toArray();
-
-            if (empty($translations)) {
-                throw new TranslationExportException("No translations available for locale: {$locale}");
-            }
-
-            return $translations;
+            return $this->loadExportData($locale);
         });
+    }
+
+    protected function loadExportData(string $locale): array
+    {
+        $translations = Translation::where('locale', $locale)
+            ->pluck('content', 'key')
+            ->toArray();
+
+        if (empty($translations)) {
+            throw new TranslationExportException("No translations available for locale: {$locale}");
+        }
+
+        return $translations;
+    }
+
+    public function find(int $id): Translation
+    {
+        return Translation::findOrFail($id);
     }
 
     public function upsert(array $data): Translation
     {
         try {
-            $translation = Translation::updateOrCreate(
-                ['key' => $data['key'], 'locale' => $data['locale']],
-                ['content' => $data['content'], 'tags' => $data['tags'] ?? []]
+            $translation = Translation::firstOrNew(
+                ['key' => $data['key'], 'locale' => $data['locale']]
             );
+
+            $translation->content = $data['content'];
+
+            if (array_key_exists('tags', $data)) {
+                $translation->tags = $data['tags'] ?? [];
+            } elseif (! $translation->exists) {
+                $translation->tags = [];
+            }
+
+            $translation->save();
         } catch (\Throwable $e) {
             throw new TranslationException('Unable to save the translation.', 0, $e);
         }

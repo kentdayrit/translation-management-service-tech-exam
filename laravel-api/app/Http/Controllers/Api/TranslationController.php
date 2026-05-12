@@ -11,6 +11,7 @@ use App\Http\Resources\TranslationCollection;
 use App\Http\Resources\TranslationResource;
 use App\Services\TranslationService;
 use App\Traits\ApiResponser;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 
@@ -48,6 +49,32 @@ class TranslationController extends Controller
             new TranslationCollection($results),
             'Translations retrieved successfully.'
         );
+    }
+
+    #[OA\Get(
+        path: '/v1/translations/{id}',
+        tags: ['Translations'],
+        summary: 'Retrieve a single translation entry.',
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Translation retrieved successfully.'),
+            new OA\Response(response: 404, description: 'Translation not found.'),
+        ]
+    )]
+    public function show(int $id): JsonResponse
+    {
+        try {
+            $translation = $this->translationService->find($id);
+
+            return $this->successResponse(
+                new TranslationResource($translation),
+                'Translation retrieved successfully.'
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Translation not found.', 404);
+        }
     }
 
     #[OA\Post(

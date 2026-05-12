@@ -9,6 +9,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('throttle:api')->group(function () {
         Route::get('/translations/search', [TranslationController::class, 'index']);
+        Route::get('/translations/{id}', [TranslationController::class, 'show'])->whereNumber('id');
         Route::get('/translations/export/{locale}', [TranslationController::class, 'export']);
 
         Route::middleware('auth:sanctum')->group(function () {

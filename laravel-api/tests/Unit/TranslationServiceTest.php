@@ -104,6 +104,52 @@ class TranslationServiceTest extends TestCase
         ]);
     }
 
+    public function test_upsert_preserves_existing_tags_when_not_provided()
+    {
+        $existing = Translation::factory()->create([
+            'key' => 'app.test',
+            'locale' => 'en',
+            'content' => 'Old',
+            'tags' => ['web']
+        ]);
+
+        $data = [
+            'key' => 'app.test',
+            'locale' => 'en',
+            'content' => 'New content',
+        ];
+
+        $translation = $this->service->upsert($data);
+
+        $this->assertEquals($existing->id, $translation->id);
+        $this->assertEquals(['web'], $translation->tags);
+        $this->assertDatabaseHas('translations', [
+            'key' => 'app.test',
+            'locale' => 'en',
+            'content' => 'New content',
+            'tags' => json_encode(['web'])
+        ]);
+    }
+
+    public function test_upsert_sets_empty_tags_when_not_provided_for_new_translation()
+    {
+        $data = [
+            'key' => 'app.test',
+            'locale' => 'en',
+            'content' => 'New content',
+        ];
+
+        $translation = $this->service->upsert($data);
+
+        $this->assertEquals([], $translation->tags);
+        $this->assertDatabaseHas('translations', [
+            'key' => 'app.test',
+            'locale' => 'en',
+            'content' => 'New content',
+            'tags' => json_encode([])
+        ]);
+    }
+
     public function test_upsert_throws_exception_on_failure()
     {
         // Mock a failure scenario, e.g., database error

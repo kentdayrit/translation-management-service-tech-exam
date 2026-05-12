@@ -23,12 +23,10 @@ class TranslationCacheServiceTest extends TestCase
 
     public function test_flush_locale_cache_with_unsupported_store()
     {
-        // Mock unsupported store
         $store = $this->mock(\Illuminate\Cache\Repository::class);
         Cache::shouldReceive('getStore')
             ->andReturn($store);
 
-        // Should not call tags
         Cache::shouldNotReceive('tags');
 
         $service = new TranslationCacheService();
