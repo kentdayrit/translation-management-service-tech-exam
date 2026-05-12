@@ -124,4 +124,23 @@ class TranslationApiTest extends TestCase
                 'message' => 'No translations available for locale: en'
             ]);
     }
+
+    public function test_show_translation()
+    {
+        $translation = Translation::factory()->create(['locale' => 'en', 'key' => 'test.view', 'content' => 'View content']);
+
+        $response = $this->getJson("/api/v1/translations/{$translation->id}");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'Success',
+                'message' => 'Translation retrieved successfully.',
+                'data' => [
+                    'id' => $translation->id,
+                    'key' => 'test.view',
+                    'locale' => 'en',
+                    'content' => 'View content'
+                ]
+            ]);
+    }
 }

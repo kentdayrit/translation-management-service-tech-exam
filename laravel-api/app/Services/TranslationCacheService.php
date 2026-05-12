@@ -9,10 +9,15 @@ class TranslationCacheService
 {
     public function flushLocaleCache(string $locale): void
     {
-        $store = Cache::getStore();
-
-        if ($store instanceof TaggableStore) {
-            Cache::tags(["locale_{$locale}"])->flush();
+        if (! $this->supportsTags()) {
+            return;
         }
+
+        Cache::tags(["translations_locale_{$locale}"])->flush();
+    }
+
+    public function supportsTags(): bool
+    {
+        return Cache::getStore() instanceof TaggableStore;
     }
 }
